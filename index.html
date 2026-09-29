@@ -609,7 +609,14 @@
           <label>Password</label>
           <input type="password" id="loginPassword" class="form-input" placeholder="Masukkan password Anda" required />
         </div>
-        <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.8rem;">
+        
+          <div class="form-group">
+            <label>Token WhatsApp Gateway (Opsional - Fonnte API)</label>
+            <input type="text" id="editFonnteToken" class="form-input" placeholder="Masukkan token Fonnte jika ingin auto-send 100%" />
+            <small style="font-size:0.68rem; color:var(--text-muted);">Jika diisi, notifikasi otomatis terkirim via server tanpa perlu buka aplikasi WA.</small>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.8rem;">
           🚀 Masuk ke Akun
         </button>
 
@@ -1064,7 +1071,12 @@
         <div>Simpan struk ini untuk pengambilan.</div>
         <div style="font-weight: 700; margin-top: 2px;">Terima kasih!</div>
       </div>
-      <button onclick="document.getElementById('receiptModal').classList.remove('show')" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 8px;">Tutup</button>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px;">
+        <button id="rcpBtnSendWa" class="btn btn-sm" style="background: #25D366; color: white;" onclick="">📲 Kirim WA</button>
+        <button onclick="document.getElementById('receiptModal').classList.remove('show')" class="btn btn-outline btn-sm">Tutup</button>
+      </div>
+
     </div>
   </div>
 
@@ -1295,6 +1307,7 @@
       document.getElementById('editStoreCity').value = t.city;
       document.getElementById('editStoreAddress').value = t.address;
       document.getElementById('editBasePrice').value = t.pricePerKg;
+      document.getElementById('editFonnteToken').value = t.fonnteToken || '';
 
       calcTotal();
       renderKanban();
@@ -1317,6 +1330,7 @@
       t.city = document.getElementById('editStoreCity').value.trim();
       t.address = document.getElementById('editStoreAddress').value.trim();
       t.pricePerKg = parseFloat(document.getElementById('editBasePrice').value) || 7000;
+      t.fonnteToken = document.getElementById('editFonnteToken').value.trim();
 
       const users = getUsers();
       const idx = users.findIndex(u => u.id === activeUser.id);
@@ -1420,7 +1434,12 @@
       document.getElementById('rcpService').innerText = `${serviceName} (${weight} Kg)`;
       document.getElementById('rcpTotal').innerText = 'Rp ' + total.toLocaleString('id-ID');
       document.getElementById('rcpPayStatus').innerText = remaining === 0 ? "LUNAS" : 'SISA: Rp ' + remaining.toLocaleString('id-ID');
+      
+      document.getElementById('rcpBtnSendWa').onclick = function() {
+        sendWhatsAppForOrder(order.id, 'received');
+      };
       document.getElementById('receiptModal').classList.add('show');
+
 
       // WhatsApp Toast
       // WhatsApp sent silently via background API
@@ -1482,7 +1501,7 @@
       if (order.status === 'ironing') {
         return `<button class="btn btn-primary btn-sm" style="width:100%; background:var(--success); color:white;" onclick="updateOrderStatus('${order.id}', 'ready')">✨ Selesai (Kirim WA)</button>`;
       }
-      return `<div style="font-size:0.72rem; color:#10B981; text-align:center; font-weight:700;">✓ Siap Diambil</div>`;
+      return `<div style="display:flex; flex-direction:column; gap:4px;"><div style="font-size:0.72rem; color:#10B981; text-align:center; font-weight:700;">✓ Siap Diambil</div><button class="btn btn-sm" style="background:#25D366; color:white; font-size:0.7rem; padding:4px;" onclick="sendWhatsAppForOrder('${order.id}', 'ready')">📲 Kirim Ulang WA</button></div>`;
     }
 
     function updateOrderStatus(id, newStatus) {
