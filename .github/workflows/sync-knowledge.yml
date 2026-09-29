@@ -1,0 +1,58 @@
+name: Sync Knowledge to Master
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  extract-and-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Extract AST & Docs Payload
+        id: extract
+        run: |
+          # Generate knowledge-payload.json from repository files
+          node -e '
+            const fs = require("fs");
+            const payload = {
+              repository: process.env.GITHUB_REPOSITORY || "nstok-id/example",
+              commitHash: process.env.GITHUB_SHA || "local",
+              branch: process.env.GITHUB_REF_NAME || "main",
+              timestamp: new Date().toISOString(),
+              codeItems: [],
+              documentItems: []
+            };
+
+            // Ingest markdown docs if present
+            if (fs.existsSync("docs")) {
+              fs.readdirSync("docs").forEach(file => {
+                if (file.endsWith(".md")) {
+                  payload.documentItems.push({
+                    docId: file.replace(".md", ""),
+                    docType: file.startsWith("SOP") ? "SOP" : (file.startsWith("ADR") ? "ADR" : "PRD"),
+                    title: file,
+                    category: "Repository Docs",
+                    tags: ["docs", "github-actions"],
+                    content: fs.readFileSync(`docs/${file}`, "utf-8")
+                  });
+                }
+              });
+            }
+
+            fs.writeFileSync("knowledge-payload.json", JSON.stringify(payload, null, 2));
+          '
+
+      - name: Post to Zero-Clone Webhook
+        run: |
+          curl -X POST "${{ secrets.KNOWLEDGE_MASTER_URL }}/api/sync-knowledge" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.KNOWLEDGE_SYNC_SECRET }}" \
+            --data-binary @knowledge-payload.json
