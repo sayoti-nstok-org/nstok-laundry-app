@@ -10,6 +10,9 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
+      "@nstok/core": [
+        "src/shims/core.ts"
+      ],
       "@nstok/ui": [
         "src/shims/ui.tsx"
       ],
@@ -17,6 +20,7 @@
         "src/shims/db.ts"
       ],
       "@nstok/*": [
+        "src/shims/*",
         "src/*"
       ]
     }
