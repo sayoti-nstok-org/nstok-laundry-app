@@ -1,0 +1,80 @@
+{
+  "package.json": {
+    "mtime": 1790656768.9486837,
+    "seen": 1790656806.3523917,
+    "ast_hash": "e40ebc4d9dad1c5ef6e7a10e8cf4137f",
+    "semantic_hash": "e40ebc4d9dad1c5ef6e7a10e8cf4137f"
+  },
+  "src/app/_layout.tsx": {
+    "mtime": 1790656768.9492579,
+    "seen": 1790656806.352396,
+    "ast_hash": "c9e72514c0e927044ec95d44e26cdb0e",
+    "semantic_hash": "c9e72514c0e927044ec95d44e26cdb0e"
+  },
+  "src/app/index.tsx": {
+    "mtime": 1790656768.949332,
+    "seen": 1790656806.3523982,
+    "ast_hash": "ba9b4940e8af9f11dc82121c5b1316cf",
+    "semantic_hash": "ba9b4940e8af9f11dc82121c5b1316cf"
+  },
+  "src/config/app.config.ts": {
+    "mtime": 1790656768.949332,
+    "seen": 1790656806.3523996,
+    "ast_hash": "25ad2379705bdeacab721e5b588e48a2",
+    "semantic_hash": "25ad2379705bdeacab721e5b588e48a2"
+  },
+  "src/shims/core.ts": {
+    "mtime": 1790656768.949332,
+    "seen": 1790656806.3524005,
+    "ast_hash": "a11fbf65756e2bbd47507b07481d3ed1",
+    "semantic_hash": "a11fbf65756e2bbd47507b07481d3ed1"
+  },
+  "src/shims/db.ts": {
+    "mtime": 1790656768.9495394,
+    "seen": 1790656806.3524017,
+    "ast_hash": "cd2f9eefa25c5855e48e6907e5ea96b1",
+    "semantic_hash": "cd2f9eefa25c5855e48e6907e5ea96b1"
+  },
+  "src/shims/ui.tsx": {
+    "mtime": 1790656768.9495394,
+    "seen": 1790656806.3524027,
+    "ast_hash": "fd8b139a45176a700ada36669f9daa1c",
+    "semantic_hash": "fd8b139a45176a700ada36669f9daa1c"
+  },
+  "tsconfig.json": {
+    "mtime": 1790656768.9495394,
+    "seen": 1790656806.3524036,
+    "ast_hash": "e27cb691450af5596e3ef58781ba9f42",
+    "semantic_hash": "e27cb691450af5596e3ef58781ba9f42"
+  },
+  ".github/workflows/ci.yml": {
+    "mtime": 1790656768.9485717,
+    "seen": 1790656806.3524048,
+    "ast_hash": "37e6bce088a07d9d4e7d592786d33642",
+    "semantic_hash": "37e6bce088a07d9d4e7d592786d33642"
+  },
+  ".github/workflows/graphify.yml": {
+    "mtime": 1790656768.9486837,
+    "seen": 1790656806.3524058,
+    "ast_hash": "cc788b2eda581af76086dab86f2a36b4",
+    "semantic_hash": "cc788b2eda581af76086dab86f2a36b4"
+  },
+  ".github/workflows/sync-rag.yml": {
+    "mtime": 1790656768.9486837,
+    "seen": 1790656806.3524067,
+    "ast_hash": "dc49e38c4fa4f98fb4cedacf7bb1a704",
+    "semantic_hash": "dc49e38c4fa4f98fb4cedacf7bb1a704"
+  },
+  "README.md": {
+    "mtime": 1790656768.9486837,
+    "seen": 1790656806.3524082,
+    "ast_hash": "d61f73304a532bee6aaf4b4c1dec2f34",
+    "semantic_hash": "d61f73304a532bee6aaf4b4c1dec2f34"
+  },
+  "index.html": {
+    "mtime": 1790656768.9486837,
+    "seen": 1790656806.3524091,
+    "ast_hash": "2a2cd6833b7f94d23065d63d2e492190",
+    "semantic_hash": "2a2cd6833b7f94d23065d63d2e492190"
+  }
+}

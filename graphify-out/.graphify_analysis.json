@@ -1,0 +1,213 @@
+{
+  "communities": {
+    "0": [
+      "index_calclaundrytotal",
+      "index_closeregistermodal",
+      "index_getcurrenttenant",
+      "index_getkanbanbtn",
+      "index_handlecreatenewtenant",
+      "index_handlepaystatuschange",
+      "index_inittenants",
+      "index_renderkanban",
+      "index_showwhatsapp",
+      "index_submitlaundryorder",
+      "index_switchtab",
+      "index_switchtenant",
+      "index_tenants",
+      "index_updatecurrenttenantview",
+      "index_updateorderstatus"
+    ],
+    "1": [
+      "package",
+      "package_devdependencies",
+      "package_devdependencies_types_react",
+      "package_devdependencies_typescript",
+      "package_name",
+      "package_private",
+      "package_version",
+      "ref_expo",
+      "ref_expo_router",
+      "ref_react",
+      "ref_types_react",
+      "ref_typescript",
+      "src_app_layout",
+      "src_app_layout_rootlayout"
+    ],
+    "2": [
+      "tsconfig",
+      "tsconfig_compileroptions",
+      "tsconfig_compileroptions_allowsyntheticdefaultimports",
+      "tsconfig_compileroptions_baseurl",
+      "tsconfig_compileroptions_esmoduleinterop",
+      "tsconfig_compileroptions_jsx",
+      "tsconfig_compileroptions_module",
+      "tsconfig_compileroptions_moduleresolution",
+      "tsconfig_compileroptions_skiplibcheck",
+      "tsconfig_compileroptions_strict",
+      "tsconfig_compileroptions_target",
+      "tsconfig_include"
+    ],
+    "3": [
+      "ref_react_native",
+      "src_app_index",
+      "src_app_index_homescreen",
+      "src_shims_ui",
+      "src_shims_ui_button",
+      "src_shims_ui_buttonprops",
+      "src_shims_ui_card",
+      "src_shims_ui_datatable",
+      "src_shims_ui_searchinput"
+    ],
+    "4": [
+      "package_scripts",
+      "package_scripts_android",
+      "package_scripts_ios",
+      "package_scripts_lint",
+      "package_scripts_start",
+      "package_scripts_test",
+      "package_scripts_typecheck",
+      "package_scripts_web"
+    ],
+    "5": [
+      "package_dependencies",
+      "package_dependencies_expo",
+      "package_dependencies_expo_router",
+      "package_dependencies_react",
+      "package_dependencies_react_native"
+    ],
+    "6": [
+      "tsconfig_compileroptions_paths",
+      "tsconfig_paths_nstok",
+      "tsconfig_paths_nstok_core",
+      "tsconfig_paths_nstok_db",
+      "tsconfig_paths_nstok_ui"
+    ],
+    "7": [
+      "src_config_app_config",
+      "src_config_app_config_appconfig",
+      "src_config_app_config_appconfigtype"
+    ],
+    "8": [
+      "src_shims_db",
+      "src_shims_db_db",
+      "src_shims_db_servicetickets"
+    ],
+    "9": [
+      "github_workflows_graphify",
+      "github_workflows_sync_rag"
+    ],
+    "10": [
+      "src_shims_core",
+      "src_shims_core_applicationcomposition"
+    ],
+    "11": [
+      "github_workflows_ci"
+    ],
+    "12": [
+      "index_html"
+    ],
+    "13": [
+      "index_openregistermodal"
+    ],
+    "14": [
+      "readme_nstok_laundry_app"
+    ]
+  },
+  "cohesion": {
+    "0": 0.19047619047619047,
+    "1": 0.15384615384615385,
+    "2": 0.16666666666666666,
+    "3": 0.3055555555555556,
+    "4": 0.25,
+    "5": 0.4,
+    "6": 0.4,
+    "7": 0.6666666666666666,
+    "8": 0.6666666666666666,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0
+  },
+  "gods": [
+    {
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 11
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 8
+    },
+    {
+      "id": "tsconfig_compileroptions_paths",
+      "label": "paths",
+      "degree": 5
+    },
+    {
+      "id": "index_getcurrenttenant",
+      "label": "getCurrentTenant",
+      "degree": 5
+    },
+    {
+      "id": "index_renderkanban",
+      "label": "renderKanban",
+      "degree": 5
+    },
+    {
+      "id": "ref_react",
+      "label": "react",
+      "degree": 4
+    },
+    {
+      "id": "index_updatecurrenttenantview",
+      "label": "updateCurrentTenantView",
+      "degree": 4
+    },
+    {
+      "id": "index_updateorderstatus",
+      "label": "updateOrderStatus",
+      "degree": 4
+    },
+    {
+      "id": "ref_react_native",
+      "label": "react-native",
+      "degree": 3
+    },
+    {
+      "id": "src_shims_ui_button",
+      "label": "Button()",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "HomeScreen()",
+      "target": "Button()",
+      "source_files": [
+        "src/app/index.tsx",
+        "src/shims/ui.tsx"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "Sync RAG Knowledge to Weaviate Workflow",
+      "target": "Update Graphify Knowledge Graph Workflow",
+      "source_files": [
+        ".github/workflows/sync-rag.yml",
+        ".github/workflows/graphify.yml"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "cross-file semantic connection"
+    }
+  ],
+  "tokens": {
+    "input": 19417,
+    "output": 4623
+  }
+}
