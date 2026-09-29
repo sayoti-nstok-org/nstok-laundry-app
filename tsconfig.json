@@ -1,19 +1,27 @@
-﻿{
-   compilerOptions: {
-    target: ES2022,
-    module: ESNext,
-    moduleResolution: bundler,
-    jsx: react-jsx,
-    strict: false,
-    skipLibCheck: true,
-    esModuleInterop: true,
-    allowSyntheticDefaultImports: true,
-    baseUrl: .,
-    paths: {
-      @nstok/ui: [src/shims/ui.tsx],
-      @nstok/db: [src/shims/db.ts],
-      @nstok/*: [src/*]
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nstok/ui": [
+        "src/shims/ui.tsx"
+      ],
+      "@nstok/db": [
+        "src/shims/db.ts"
+      ],
+      "@nstok/*": [
+        "src/*"
+      ]
     }
   },
-  include: [src/**/*]
+  "include": [
+    "src/**/*"
+  ]
 }

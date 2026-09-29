@@ -1,24 +1,24 @@
-﻿{
-  name: nstok-laundry-app,
-  version: 1.0.0,
-  private: true,
-  scripts: {
-    start: expo start,
-    android: expo start --android,
-    ios: expo start --ios,
-    web: expo start --web,
-    test: node -e \console.log('All tests passed.')",
-    lint: node -e \console.log('Linting passed.')",
-    typecheck: tsc --noEmit
+{
+  "name": "nstok-laundry-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "test": "node -e \"console.log('All tests passed.')\"",
+    "lint": "node -e \"console.log('Linting passed.')\"",
+    "typecheck": "tsc --noEmit"
   },
-  dependencies: {
-    expo: ~52.0.0,
-    react: 18.3.1,
-    react-native: 0.76.0,
-    expo-router: ~4.0.0
+  "dependencies": {
+    "expo": "~52.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.0",
+    "expo-router": "~4.0.0"
   },
-  devDependencies: {
-    typescript: ^5.3.3,
-    @types/react: ~18.3.12
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/react": "~18.3.12"
   }
 }
