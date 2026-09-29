@@ -1,0 +1,29 @@
+{
+  "name": "nstok-laundry-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nstok/db": "workspace:*",
+    "@nstok/ui": "workspace:*",
+    "expo": "~52.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.0",
+    "expo-router": "~4.0.0",
+    "@nstok/nstok-feature-laundry-tracking": "workspace:*",
+    "@nstok/nstok-feature-customer": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/react": "~18.3.12",
+    "vitest": "^2.1.0"
+  }
+}
