@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NSTOK LaundryTrack — Multi-Tenant Laundry SaaS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-main: #090D16;
+      --bg-card: #111827;
+      --bg-card-hover: #1F2937;
+      --border-color: #374151;
+      --primary: #06B6D4; /* Cyan tone for clean fresh water/laundry */
+      --primary-hover: #0891B2;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --purple: #8B5CF6;
+      --text-main: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation with Multi-Tenant Switcher */
+    header {
+      background: rgba(17, 24, 39, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #06B6D4, #3B82F6);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: white;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4);
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title span {
+      color: var(--primary);
+    }
+
+    .tenant-badge-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #1F2937;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid #374151;
+    }
+
+    .tenant-select {
+      background: transparent;
+      border: none;
+      color: #38BDF8;
+      font-weight: 700;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .tenant-select option {
+      background: #111827;
+      color: white;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0.4rem;
+      background: #1F2937;
+      padding: 4px;
+      border-radius: 10px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-btn.active {
+      background: var(--primary);
+      color: #090D16;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 1.5rem;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .view-container {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .view-container.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards & Forms */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #1F2937;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: #090D16;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      color: white;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--primary);
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #0284C7);
+      color: #090D16;
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      background: #1F2937;
+    }
+
+    .btn-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    /* KANBAN BOARD */
+    .kanban-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .kanban-col {
+      background: #111827;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1rem;
+      min-height: 75vh;
+    }
+
+    .kanban-col-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid;
+    }
+
+    .col-received { border-color: #38BDF8; }
+    .col-washing { border-color: #F59E0B; }
+    .col-ironing { border-color: #A855F7; }
+    .col-ready { border-color: #10B981; }
+
+    .kanban-card {
+      background: #1F2937;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .kanban-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+      border-color: var(--primary);
+    }
+
+    .badge-perfume {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(168, 85, 247, 0.2);
+      color: #D8B4FE;
+      font-weight: 600;
+    }
+
+    /* Phone Simulator for Customer */
+    .mobile-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .phone-frame {
+      width: 380px;
+      height: 700px;
+      background: #0B132B;
+      border: 8px solid #334155;
+      border-radius: 40px;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+
+    .phone-notch {
+      width: 140px;
+      height: 20px;
+      background: #334155;
+      margin: 0 auto;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+    }
+
+    /* Modal for Registration */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #111827;
+      border: 1px solid var(--border-color);
+      width: 480px;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    }
+
+    /* WhatsApp preview */
+    .wa-toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 350px;
+      background: #075E54;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+      z-index: 999;
+      transform: translateY(120%);
+      transition: transform 0.4s ease;
+      overflow: hidden;
+    }
+
+    .wa-toast.show {
+      transform: translateY(0);
+    }
+
+    /* Thermal Receipt */
+    .receipt-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .receipt-modal.show { display: flex; }
+
+    .receipt-paper {
+      background: white;
+      color: black;
+      width: 280px;
+      padding: 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="logo-badge">🧺</div>
+      <div>
+        <div class="brand-title">NSTOK <span>LaundryTrack</span></div>
+        <div style="font-size: 0.7rem; color: var(--text-muted);">SaaS Multi-Tenant Khusus Usaha Laundry</div>
+      </div>
+    </div>
+
+    <!-- Multi-Tenant Workspace Selector -->
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <div class="tenant-badge-box">
+        <span style="font-size: 0.75rem; color: var(--text-muted);">🏢 Workspace:</span>
+        <select id="tenantSelect" class="tenant-select" onchange="switchTenant()">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="openRegisterModal()">+ Daftar Laundry Baru</button>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-btn active" onclick="switchTab('intake')">⚖️ Kasir Timbang</button>
+      <button class="nav-btn" onclick="switchTab('kanban')">🧼 Antrian Cuci</button>
+      <button class="nav-btn" onclick="switchTab('customer')">📱 Layar Pelanggan</button>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main>
+
+    <!-- TAB 1: KASIR TIMBANG & NOTA LAUNDRY -->
+    <div id="view-intake" class="view-container active">
+      <div style="display: grid; grid-template-columns: 1fr 420px; gap: 1.5rem;">
+        
+        <!-- Form Intake -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⚖️ Penerimaan Cucian Masuk (Nota Baru)</div>
+            <div id="displayTicketNo" style="font-family: 'JetBrains Mono'; font-size: 0.85rem; color: var(--primary);">#LND-202609-001</div>
+          </div>
+
+          <!-- Customer Data -->
+          <div class="row-2">
+            <div class="form-group">
+              <label>Nama Pelanggan</label>
+              <input type="text" id="custName" class="form-input" placeholder="Contoh: Ibu Rina Melati" value="Ibu Rina Melati" />
+            </div>
+            <div class="form-group">
+              <label>No. WhatsApp (Untuk Notifikasi Tracking)</label>
+              <input type="text" id="custPhone" class="form-input" placeholder="081234567890" value="085712345678" />
+            </div>
+          </div>
+
+          <!-- Service & Weight -->
+          <div class="row-3">
+            <div class="form-group">
+              <label>Layanan Laundry</label>
+              <select id="laundryService" class="form-select" onchange="calcLaundryTotal()">
+                <option value="7000" data-name="Cuci Kering Setrika (Reguler)">Cuci Kering Setrika - Rp 7.000/kg</option>
+                <option value="5000" data-name="Cuci Kering Lipat">Cuci Kering Lipat - Rp 5.000/kg</option>
+                <option value="4000" data-name="Setrika Saja">Setrika Saja - Rp 4.000/kg</option>
+                <option value="25000" data-name="Bedcover Besar (Satuan)">Bedcover Besar - Rp 25.000/pcs</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Berat (Kg) / Pcs</label>
+              <input type="number" step="0.1" id="laundryWeight" class="form-input" value="6.5" oninput="calcLaundryTotal()" />
+            </div>
+            <div class="form-group">
+              <label>Paket Kecepatan</label>
+              <select id="speedPackage" class="form-select" onchange="calcLaundryTotal()">
+                <option value="1" data-label="Reguler (3 Hari)">Reguler 3 Hari</option>
+                <option value="1.5" data-label="Kilat (1 Hari)">⚡ Kilat 1 Hari (+50%)</option>
+                <option value="2" data-label="Express (4 Jam)">🚀 Express 4 Jam (2x)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Perfume & Notes -->
+          <div class="row-2">
+            <div class="form-group">
+              <label>Pilihan Parfum Laundry</label>
+              <select id="laundryPerfume" class="form-select">
+                <option value="Sakura Blossom">🌸 Sakura Blossom (Best Seller)</option>
+                <option value="Ocean Fresh">🌊 Ocean Fresh (Segar)</option>
+                <option value="Akasia Wood">🪵 Akasia Floral</option>
+                <option value="Downy Mystic">💜 Downy Mystic</option>
+                <option value="Tanpa Parfum">🚫 Tanpa Parfum (Sensitif)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Catatan Khusus Cucian</label>
+              <input type="text" id="laundryNotes" class="form-input" placeholder="Contoh: Baju putih pisahkan, kemeja jangan disikat keras" value="Baju putih harap dipisah" />
+            </div>
+          </div>
+
+          <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--primary); margin-bottom: 4px;">💡 Otomatisasi Multi-Tenant NSTOK:</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Begitu nota disimpan, WhatsApp pelanggan otomatis menerima rincian kiloan, aroma parfum, estimasi selesai, dan link tracking resmi milik laundry Anda.</div>
+          </div>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="card-header">
+              <div class="card-title">💵 Rincian Pembayaran</div>
+            </div>
+
+            <div style="background: #090D16; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">
+                <span>Tarif Dasar:</span>
+                <span id="txtBaseRate">Rp 7.000 x 6.5 Kg</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">
+                <span>Multiplier Kecepatan:</span>
+                <span id="txtMultiplier">1.0x (Reguler)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800; color: white; border-top: 1px solid #1F2937; padding-top: 8px;">
+                <span>Total Biaya:</span>
+                <span id="txtLaundryTotal" style="color: var(--primary);">Rp 45.500</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Status Pembayaran</label>
+              <select id="payStatus" class="form-select" onchange="handlePayStatusChange()">
+                <option value="paid_full">✅ Bayar Lunas di Awal</option>
+                <option value="down_payment">💳 Bayar DP (Uang Muka)</option>
+                <option value="unpaid">⏳ Bayar Nanti Saat Ambil</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="dpGroup" style="display: none;">
+              <label>Nominal DP</label>
+              <input type="number" id="inputDP" class="form-input" value="20000" oninput="calcLaundryTotal()" />
+            </div>
+
+            <div class="form-group">
+              <label>Sisa Tagihan</label>
+              <div id="txtRemaining" style="font-size: 1.1rem; font-weight: 700; color: var(--success); padding: 0.5rem; background: #090D16; border-radius: 8px;">LUNAS (Rp 0)</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1rem;" onclick="submitLaundryOrder()">
+            🚀 Cetak Struk & Kirim WA Customer
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 2: KANBAN STATUS CUCI -->
+    <div id="view-kanban" class="view-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <h3 style="font-weight: 800; font-size: 1.1rem;">Alur Pengerjaan Cucian (<span id="kanbanWorkspaceName">Berkah Laundry</span>)</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Data ini 100% terisolasi untuk workspace ini saja.</p>
+        </div>
+        <div style="font-size: 0.8rem; color: #38BDF8; font-weight: 600;">⚡ Realtime Multi-Tenant Sync</div>
+      </div>
+
+      <div class="kanban-grid">
+        <!-- Antrian Masuk -->
+        <div class="kanban-col col-received">
+          <div class="kanban-col-header" style="color: #38BDF8;">
+            <span>📥 Antrian Masuk</span>
+            <span id="count-received" style="font-family: 'JetBrains Mono'; font-weight: 700;">0</span>
+          </div>
+          <div id="list-received"></div>
+        </div>
+
+        <!-- Proses Cuci & Pengeringan -->
+        <div class="kanban-col col-washing">
+          <div class="kanban-col-header" style="color: #F59E0B;">
+            <span>🧼 Cuci & Pengeringan</span>
+            <span id="count-washing" style="font-family: 'JetBrains Mono'; font-weight: 700;">0</span>
+          </div>
+          <div id="list-washing"></div>
+        </div>
+
+        <!-- Setrika & Packing -->
+        <div class="kanban-col col-ironing">
+          <div class="kanban-col-header" style="color: #A855F7;">
+            <span>👔 Setrika & Packing</span>
+            <span id="count-ironing" style="font-family: 'JetBrains Mono'; font-weight: 700;">0</span>
+          </div>
+          <div id="list-ironing"></div>
+        </div>
+
+        <!-- Siap Diambil -->
+        <div class="kanban-col col-ready">
+          <div class="kanban-col-header" style="color: #10B981;">
+            <span>✨ Siap Diambil</span>
+            <span id="count-ready" style="font-family: 'JetBrains Mono'; font-weight: 700;">0</span>
+          </div>
+          <div id="list-ready"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: SIMULASI MOBILE SCREEN CUSTOMER -->
+    <div id="view-customer" class="view-container">
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 800;">Simulasi Layar Pelanggan (Tanpa Login / Zero Friction)</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Pelanggan menerima link WhatsApp dan langsung membuka halaman pelacakan bermerek laundry Anda.</p>
+      </div>
+
+      <div class="mobile-wrapper">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          
+          <div style="padding: 1.25rem;">
+            <!-- Store Header -->
+            <div style="text-align: center; padding-bottom: 1rem; border-bottom: 1px solid #1E293B;">
+              <div style="font-size: 1.1rem; font-weight: 800; color: white;" id="custStoreName">Berkah Laundry Kiloan</div>
+              <div style="font-size: 0.7rem; color: #94A3B8;">Cabang Utama • Jl. Sukajadi No. 12</div>
+            </div>
+
+            <!-- Ticket Hero -->
+            <div style="background: linear-gradient(135deg, #1E293B, #0F172A); border: 1px solid #334155; border-radius: 14px; padding: 1rem; margin-top: 1rem; text-align: center;">
+              <div style="font-size: 0.75rem; color: #94A3B8; font-family: 'JetBrains Mono';" id="custTicketBadge">#LND-202609-001</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: white; margin: 0.35rem 0;" id="custServiceTitle">Cuci Kering Setrika (6.5 Kg)</div>
+              <div style="display: inline-block; background: rgba(6, 182, 212, 0.2); color: #38BDF8; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; border: 1px solid #06B6D4;" id="custLiveStatus">
+                🧼 Sedang Dicuci & Dikeringkan
+              </div>
+            </div>
+
+            <!-- Stepper Timeline -->
+            <div style="margin: 1.5rem 0; padding-left: 20px; border-left: 2px solid #334155; font-size: 0.85rem;">
+              <div style="margin-bottom: 1rem; position: relative;">
+                <div style="position: absolute; left: -27px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--success);"></div>
+                <div style="font-weight: 700; color: white;">Timbangan Diterima di Kasir</div>
+                <div style="font-size: 0.7rem; color: #94A3B8;">Parfum: Sakura Blossom • 6.5 Kg</div>
+              </div>
+              <div style="margin-bottom: 1rem; position: relative;">
+                <div style="position: absolute; left: -27px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 10px var(--primary);"></div>
+                <div style="font-weight: 700; color: white;">Proses Cuci & Mesin Pengering</div>
+                <div style="font-size: 0.7rem; color: #38BDF8;">Pengerjaan sedang berjalan...</div>
+              </div>
+              <div style="margin-bottom: 1rem; position: relative;">
+                <div style="position: absolute; left: -27px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #334155;"></div>
+                <div style="font-weight: 600; color: #64748B;">Setrika Uap & Packing Wangi</div>
+              </div>
+              <div style="position: relative;">
+                <div style="position: absolute; left: -27px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #334155;"></div>
+                <div style="font-weight: 600; color: #64748B;">Siap Diambil di Kasir</div>
+              </div>
+            </div>
+
+            <!-- Financial Summary Box -->
+            <div style="background: #1E293B; border-radius: 12px; padding: 1rem;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: #94A3B8; margin-bottom: 0.5rem;">RINCIAN TAGIHAN</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                <span>Total 6.5 Kg (Reguler)</span>
+                <span>Rp 45.500</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--success); font-weight: 700; border-top: 1px solid #334155; padding-top: 6px; margin-top: 6px;">
+                <span>Status Pembayaran:</span>
+                <span>LUNAS</span>
+              </div>
+            </div>
+
+            <a href="#" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; color: white; text-decoration: none; padding: 10px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; margin-top: 1.25rem;">
+              💬 Hubungi WhatsApp Laundry
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: REGISTRASI OWNER LAUNDRY BARU (MULTI-TENANT ONBOARDING) -->
+  <div class="modal-overlay" id="registerModal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #374151;">
+        <h3 style="font-weight: 800; font-size: 1.1rem; color: white;">🚀 Daftar Sebagai Owner Laundry Baru</h3>
+        <button onclick="closeRegisterModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Nama Pemilik (Owner)</label>
+        <input type="text" id="regOwnerName" class="form-input" placeholder="Contoh: Pak Budi Santoso" />
+      </div>
+
+      <div class="form-group">
+        <label>Nama Usaha Laundry</label>
+        <input type="text" id="regBusinessName" class="form-input" placeholder="Contoh: CleanWash Express Kiloan" />
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>No. WhatsApp Owner</label>
+          <input type="text" id="regPhone" class="form-input" placeholder="0812xxxxxxxx" />
+        </div>
+        <div class="form-group">
+          <label>Kota / Wilayah</label>
+          <input type="text" id="regCity" class="form-input" placeholder="Bandung" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Tarif Dasar Cuci Setrika (Rp/Kg)</label>
+        <input type="number" id="regBasePrice" class="form-input" value="8000" />
+      </div>
+
+      <button class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.85rem;" onclick="handleCreateNewTenant()">
+        ✨ Buat Workspace & Database Mandiri
+      </button>
+    </div>
+  </div>
+
+  <!-- POPUP WHATSAPP TOAST -->
+  <div class="wa-toast" id="waToast">
+    <div style="background: #128C7E; padding: 8px 12px; color: white; display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700;">
+      <span id="waStoreHeader">Berkah Laundry</span>
+      <button onclick="document.getElementById('waToast').classList.remove('show')" style="background:transparent; border:none; color:white; cursor:pointer;">✕</button>
+    </div>
+    <div style="background: #ECE5DD; padding: 12px; font-size: 0.8rem; color: #111827; max-height: 200px; overflow-y: auto;">
+      <div style="background: #DCF8C6; padding: 8px 10px; border-radius: 8px; white-space: pre-line;" id="waMessageBody"></div>
+    </div>
+  </div>
+
+  <!-- STRUK THERMAL MODAL -->
+  <div class="receipt-modal" id="receiptModal" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="receipt-paper">
+      <div style="text-align: center; margin-bottom: 8px;">
+        <div style="font-weight: 800; font-size: 0.95rem;" id="rcpStoreName">BERKAH LAUNDRY</div>
+        <div style="font-size: 0.65rem;" id="rcpAddress">Cabang Utama • Telp: 0857-1234-5678</div>
+      </div>
+      <div style="border-top: 1px dashed black; margin: 6px 0;"></div>
+      <div style="display:flex; justify-content:space-between;"><span>NO:</span><span id="rcpNo">#LND-001</span></div>
+      <div style="display:flex; justify-content:space-between;"><span>NAMA:</span><span id="rcpCust">Ibu Rina</span></div>
+      <div style="display:flex; justify-content:space-between;"><span>PARFUM:</span><span id="rcpPerfume">Sakura</span></div>
+      <div style="border-top: 1px dashed black; margin: 6px 0;"></div>
+      <div style="display:flex; justify-content:space-between;">
+        <span id="rcpService">Cuci Setrika (6.5 Kg)</span>
+        <span id="rcpTotal">Rp 45.500</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-weight:700; margin-top:4px;">
+        <span>STATUS:</span>
+        <span id="rcpPayStatus">LUNAS</span>
+      </div>
+      <div style="border-top: 1px dashed black; margin: 8px 0;"></div>
+      <div style="text-align:center; font-size:0.65rem;">
+        <div>Simpan struk ini untuk pengambilan.</div>
+        <div style="font-weight: 700; margin-top: 4px;">Terima kasih atas kepercayaan Anda!</div>
+      </div>
+      <button onclick="document.getElementById('receiptModal').classList.remove('show')" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 10px;">Tutup</button>
+    </div>
+  </div>
+
+  <script>
+    // MULTI-TENANT DATABASE SIMULATION
+    let tenants = [
+      {
+        organizationId: "org_berkah_01",
+        businessName: "Berkah Laundry Kiloan",
+        ownerName: "Pak Budi",
+        phone: "081234567890",
+        address: "Jl. Sukajadi No. 12, Bandung",
+        basePrice: 7000,
+        orders: [
+          {
+            id: "1",
+            ticketNumber: "LND-202609-001",
+            customerName: "Ibu Rina Melati",
+            customerPhone: "085712345678",
+            serviceName: "Cuci Kering Setrika",
+            weight: 6.5,
+            perfume: "Sakura Blossom",
+            status: "washing",
+            total: 45500,
+            remaining: 0,
+            trackingToken: "trk_rina88"
+          }
+        ]
+      },
+      {
+        organizationId: "org_freshclean_02",
+        businessName: "FreshClean Express",
+        ownerName: "Bu Maya",
+        phone: "081987654321",
+        address: "Ruko Melati Mas Blok B2, Jakarta",
+        basePrice: 9000,
+        orders: [
+          {
+            id: "2",
+            ticketNumber: "FCE-202609-011",
+            customerName: "Bpk. Dimas Pratama",
+            customerPhone: "081399998888",
+            serviceName: "Cuci Express 4 Jam",
+            weight: 4.0,
+            perfume: "Ocean Fresh",
+            status: "received",
+            total: 72000,
+            remaining: 72000,
+            trackingToken: "trk_dimas99"
+          }
+        ]
+      }
+    ];
+
+    let currentOrgId = "org_berkah_01";
+
+    function getCurrentTenant() {
+      return tenants.find(t => t.organizationId === currentOrgId) || tenants[0];
+    }
+
+    function initTenants() {
+      const select = document.getElementById('tenantSelect');
+      select.innerHTML = '';
+      tenants.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.organizationId;
+        opt.innerText = `${t.businessName} (${t.ownerName})`;
+        if (t.organizationId === currentOrgId) opt.selected = true;
+        select.appendChild(opt);
+      });
+      updateCurrentTenantView();
+    }
+
+    function switchTenant() {
+      currentOrgId = document.getElementById('tenantSelect').value;
+      updateCurrentTenantView();
+      renderKanban();
+    }
+
+    function updateCurrentTenantView() {
+      const tenant = getCurrentTenant();
+      document.getElementById('kanbanWorkspaceName').innerText = tenant.businessName;
+      document.getElementById('custStoreName').innerText = tenant.businessName;
+      calcLaundryTotal();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'kanban') renderKanban();
+    }
+
+    function calcLaundryTotal() {
+      const pricePerKg = parseFloat(document.getElementById('laundryService').value) || 7000;
+      const weight = parseFloat(document.getElementById('laundryWeight').value) || 0;
+      const multiplier = parseFloat(document.getElementById('speedPackage').value) || 1;
+
+      const baseTotal = pricePerKg * weight;
+      const total = baseTotal * multiplier;
+
+      document.getElementById('txtBaseRate').innerText = `Rp ${pricePerKg.toLocaleString('id-ID')} x ${weight} Kg`;
+      document.getElementById('txtMultiplier').innerText = `${multiplier}x`;
+      document.getElementById('txtLaundryTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+
+      const payStatus = document.getElementById('payStatus').value;
+      const dp = parseFloat(document.getElementById('inputDP').value) || 0;
+
+      let remaining = 0;
+      if (payStatus === 'unpaid') remaining = total;
+      else if (payStatus === 'down_payment') remaining = Math.max(0, total - dp);
+
+      const remEl = document.getElementById('txtRemaining');
+      if (remaining === 0) {
+        remEl.innerText = "LUNAS (Rp 0)";
+        remEl.style.color = "var(--success)";
+      } else {
+        remEl.innerText = `Sisa: Rp ${remaining.toLocaleString('id-ID')}`;
+        remEl.style.color = "var(--warning)";
+      }
+    }
+
+    function handlePayStatusChange() {
+      const val = document.getElementById('payStatus').value;
+      document.getElementById('dpGroup').style.display = val === 'down_payment' ? 'block' : 'none';
+      calcLaundryTotal();
+    }
+
+    function submitLaundryOrder() {
+      const tenant = getCurrentTenant();
+      const name = document.getElementById('custName').value;
+      const phone = document.getElementById('custPhone').value;
+      const weight = parseFloat(document.getElementById('laundryWeight').value) || 1;
+      const perfume = document.getElementById('laundryPerfume').value;
+      const serviceSelect = document.getElementById('laundryService');
+      const serviceName = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-name');
+      const multiplier = parseFloat(document.getElementById('speedPackage').value) || 1;
+      const total = (parseFloat(serviceSelect.value) || 7000) * weight * multiplier;
+
+      const payStatus = document.getElementById('payStatus').value;
+      const dp = parseFloat(document.getElementById('inputDP').value) || 0;
+      const remaining = payStatus === 'paid_full' ? 0 : (payStatus === 'down_payment' ? Math.max(0, total - dp) : total);
+
+      const ticketNo = "LND-" + Math.floor(100000 + Math.random() * 900000);
+      const token = "trk_" + Math.random().toString(36).substring(2, 7);
+
+      const order = {
+        id: String(Date.now()),
+        ticketNumber: ticketNo,
+        customerName: name,
+        customerPhone: phone,
+        serviceName,
+        weight,
+        perfume,
+        status: "received",
+        total,
+        remaining,
+        trackingToken: token
+      };
+
+      tenant.orders.unshift(order);
+
+      // Show Receipt
+      document.getElementById('rcpStoreName').innerText = tenant.businessName.toUpperCase();
+      document.getElementById('rcpAddress').innerText = tenant.address;
+      document.getElementById('rcpNo').innerText = '#' + ticketNo;
+      document.getElementById('rcpCust').innerText = name;
+      document.getElementById('rcpPerfume').innerText = perfume;
+      document.getElementById('rcpService').innerText = `${serviceName} (${weight} Kg)`;
+      document.getElementById('rcpTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+      document.getElementById('rcpPayStatus').innerText = remaining === 0 ? "LUNAS" : `SISA: Rp ${remaining.toLocaleString('id-ID')}`;
+      document.getElementById('receiptModal').classList.add('show');
+
+      // WhatsApp Message
+      showWhatsApp(tenant, order, "received");
+    }
+
+    function showWhatsApp(tenant, order, type) {
+      const toast = document.getElementById('waToast');
+      document.getElementById('waStoreHeader').innerText = tenant.businessName;
+      const url = `https://laundrytrack.id/t/${order.trackingToken}`;
+
+      let msg = "";
+      if (type === "received") {
+        msg = `Halo Kak *${order.customerName}*,\n\nCucian Anda di *${tenant.businessName}* telah terdaftar dengan No. Nota *#${order.ticketNumber}*.\n\n⚖️ *Berat:* ${order.weight} Kg\n🌸 *Parfum:* ${order.perfume}\n💵 *Total Tagihan:* Rp ${order.total.toLocaleString('id-ID')} (${order.remaining === 0 ? "LUNAS" : "Sisa Rp " + order.remaining.toLocaleString('id-ID')})\n\n🔍 *Pantau proses cuci di sini:*\n👉 ${url}\n\nTerima kasih!`;
+      } else if (type === "ready") {
+        msg = `Hore! 🎉 Cucian *#${order.ticketNumber}* Anda telah *SELESAI, WANGI, & PACKING RAPI*.\n\nSiap diambil di *${tenant.businessName}*.\n${order.remaining > 0 ? "💰 Sisa Bayar: Rp " + order.remaining.toLocaleString('id-ID') : "✅ Status: LUNAS"}\n\n👉 Cek nota digital:\n${url}`;
+      }
+
+      document.getElementById('waMessageBody').innerText = msg;
+      toast.classList.add('show');
+    }
+
+    function renderKanban() {
+      const tenant = getCurrentTenant();
+      const cols = {
+        received: document.getElementById('list-received'),
+        washing: document.getElementById('list-washing'),
+        ironing: document.getElementById('list-ironing'),
+        ready: document.getElementById('list-ready')
+      };
+
+      Object.values(cols).forEach(c => c.innerHTML = '');
+      let counts = { received: 0, washing: 0, ironing: 0, ready: 0 };
+
+      tenant.orders.forEach(o => {
+        if (cols[o.status]) {
+          counts[o.status]++;
+          const card = document.createElement('div');
+          card.className = 'kanban-card';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="font-family:'JetBrains Mono'; font-size:0.75rem; color:#38BDF8; font-weight:700;">#${o.ticketNumber}</span>
+              <span class="badge-perfume">🌸 ${o.perfume}</span>
+            </div>
+            <div style="font-weight:700; font-size:0.9rem; color:white;">${o.customerName}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">⚖️ ${o.weight} Kg • ${o.serviceName}</div>
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; border-top:1px solid #374151; padding-top:4px;">
+              <span style="color:#38BDF8; font-weight:700;">Rp ${o.total.toLocaleString('id-ID')}</span>
+              <span style="color:${o.remaining === 0 ? 'var(--success)' : 'var(--warning)'}; font-weight:700;">
+                ${o.remaining === 0 ? 'LUNAS' : 'Sisa Rp ' + o.remaining.toLocaleString('id-ID')}
+              </span>
+            </div>
+            <div style="margin-top:8px;">
+              ${getKanbanBtn(o)}
+            </div>
+          `;
+          cols[o.status].appendChild(card);
+        }
+      });
+
+      document.getElementById('count-received').innerText = counts.received;
+      document.getElementById('count-washing').innerText = counts.washing;
+      document.getElementById('count-ironing').innerText = counts.ironing;
+      document.getElementById('count-ready').innerText = counts.ready;
+    }
+
+    function getKanbanBtn(order) {
+      if (order.status === 'received') {
+        return `<button class="btn btn-primary btn-sm" style="width:100%;" onclick="updateOrderStatus('${order.id}', 'washing')">🧼 Mulai Cuci</button>`;
+      }
+      if (order.status === 'washing') {
+        return `<button class="btn btn-primary btn-sm" style="width:100%; background:#A855F7; color:white;" onclick="updateOrderStatus('${order.id}', 'ironing')">👔 Setrika & Packing</button>`;
+      }
+      if (order.status === 'ironing') {
+        return `<button class="btn btn-primary btn-sm" style="width:100%; background:var(--success); color:white;" onclick="updateOrderStatus('${order.id}', 'ready')">✨ Selesai (Kirim WA)</button>`;
+      }
+      return `<div style="font-size:0.75rem; color:#10B981; text-align:center; font-weight:700;">✓ Siap Diambil</div>`;
+    }
+
+    function updateOrderStatus(id, newStatus) {
+      const tenant = getCurrentTenant();
+      const order = tenant.orders.find(o => o.id === id);
+      if (order) {
+        order.status = newStatus;
+        if (newStatus === 'ready') {
+          showWhatsApp(tenant, order, "ready");
+        }
+        renderKanban();
+      }
+    }
+
+    // Modal Registration Actions
+    function openRegisterModal() {
+      document.getElementById('registerModal').classList.add('show');
+    }
+
+    function closeRegisterModal() {
+      document.getElementById('registerModal').classList.remove('show');
+    }
+
+    function handleCreateNewTenant() {
+      const owner = document.getElementById('regOwnerName').value;
+      const bizName = document.getElementById('regBusinessName').value;
+      const phone = document.getElementById('regPhone').value;
+      const city = document.getElementById('regCity').value;
+      const price = parseFloat(document.getElementById('regBasePrice').value) || 8000;
+
+      if (!bizName || !owner) {
+        alert("Mohon isi Nama Pemilik dan Nama Usaha Laundry!");
+        return;
+      }
+
+      const orgId = "org_" + Math.random().toString(36).substring(2, 9);
+      const newTenant = {
+        organizationId: orgId,
+        businessName: bizName,
+        ownerName: owner,
+        phone: phone || "081200000000",
+        address: `Jl. Raya Utama, ${city || "Indonesia"}`,
+        basePrice: price,
+        orders: []
+      };
+
+      tenants.push(newTenant);
+      currentOrgId = orgId;
+      initTenants();
+      closeRegisterModal();
+      alert(`🎉 Selamat! Workspace "${bizName}" berhasil dibuat dengan database mandiri.`);
+    }
+
+    // Init
+    initTenants();
+  </script>
+</body>
+</html>
