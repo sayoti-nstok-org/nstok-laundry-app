@@ -44,8 +44,8 @@
       overflow-x: hidden;
     }
 
-    /* AUTH VIEW (LOGIN / REGISTER SCREEN) */
-    .auth-overlay {
+    /* FULL SCREEN OVERLAYS (AUTH & ONBOARDING) */
+    .screen-overlay {
       position: fixed;
       inset: 0;
       background: radial-gradient(circle at top right, #1E293B, #0B1120);
@@ -62,7 +62,7 @@
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
       padding: 2rem 1.5rem;
       box-shadow: 0 20px 50px rgba(0,0,0,0.8);
       animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -86,12 +86,40 @@
       box-shadow: 0 8px 20px var(--primary-glow);
     }
 
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 1.25rem 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .step-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--border-color);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+    }
+
+    .step-badge.active {
+      background: var(--primary);
+      color: #0B1120;
+    }
+
     .auth-tabs {
       display: flex;
       background: #0B1120;
       border-radius: 10px;
       padding: 4px;
-      margin: 1.5rem 0;
+      margin: 1.25rem 0;
     }
 
     .auth-tab-btn {
@@ -111,6 +139,26 @@
       background: var(--primary);
       color: #0B1120;
       box-shadow: 0 2px 8px var(--primary-glow);
+    }
+
+    .alert-box {
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6EE7B7;
+    }
+
+    .alert-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
     }
 
     /* HEADER APP (RESPONSIVE) */
@@ -206,6 +254,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      cursor: pointer;
     }
 
     .logout-btn {
@@ -266,7 +315,7 @@
       max-width: 1400px;
       margin: 0 auto;
       width: 100%;
-      padding-bottom: 75px; /* Space for mobile bottom bar */
+      padding-bottom: 75px;
     }
 
     .view-container {
@@ -323,7 +372,7 @@
       letter-spacing: 0.03em;
     }
 
-    .form-input, .form-select {
+    .form-input, .form-select, .form-textarea {
       width: 100%;
       background: #0B1120;
       border: 1px solid var(--border-color);
@@ -335,12 +384,11 @@
       transition: border-color 0.2s;
     }
 
-    .form-input:focus, .form-select:focus {
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 2px var(--primary-glow);
     }
 
-    /* RESPONSIVE GRID LAYOUTS */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr;
@@ -551,81 +599,157 @@
 </head>
 <body>
 
-  <!-- 1. AUTH SCREEN (LOGIN / REGISTER MODAL) -->
-  <div class="auth-overlay" id="authScreen">
+  <!-- ============================================================== -->
+  <!-- 1. AUTH SCREEN: LOGIN & REGISTRASI AKUN -->
+  <!-- ============================================================== -->
+  <div class="screen-overlay" id="authScreen">
     <div class="auth-card">
       <div class="auth-logo">🧺</div>
       <div style="text-align: center;">
         <h2 style="font-size: 1.25rem; font-weight: 800;">NSTOK <span style="color: var(--primary);">LaundryTrack</span></h2>
-        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">SaaS Manajemen & Pelacakan Laundry Multi-Tenant</p>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Sistem Kasir & Pelacakan Laundry Multi-Tenant</p>
       </div>
 
+      <!-- Alert Notification -->
+      <div id="authAlert" class="alert-box"></div>
+
       <div class="auth-tabs">
-        <button type="button" class="auth-tab-btn active" onclick="switchAuthTab('login')">Masuk (Login)</button>
-        <button type="button" class="auth-tab-btn" onclick="switchAuthTab('register')">Daftar Laundry Baru</button>
+        <button type="button" id="tabBtnLogin" class="auth-tab-btn active" onclick="switchAuthTab('login')">Masuk (Login)</button>
+        <button type="button" id="tabBtnRegister" class="auth-tab-btn" onclick="switchAuthTab('register')">Daftar Akun Baru</button>
       </div>
 
       <!-- FORM LOGIN -->
       <form id="formLogin" onsubmit="event.preventDefault(); handleLogin();">
         <div class="form-group">
           <label>Email / No. WhatsApp</label>
-          <input type="text" id="loginEmail" class="form-input" placeholder="owner@laundry.com / 0812xxx" value="owner@berkahlaundry.com" required />
+          <input type="text" id="loginIdentifier" class="form-input" placeholder="owner@berkahlaundry.com / 08123xxx" required />
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="loginPassword" class="form-input" value="123456" required />
+          <input type="password" id="loginPassword" class="form-input" placeholder="Masukkan password Anda" required />
         </div>
         <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.8rem;">
-          🚀 Masuk ke Dashboard
+          🚀 Masuk ke Akun
         </button>
 
-        <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.85rem;">
-          <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.4rem; text-align: center;">Pilih Akun Demo Instan:</div>
+        <div style="margin-top: 1.25rem; border-top: 1px solid var(--border-color); padding-top: 0.85rem;">
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.5rem; text-align: center;">Belum punya akun? Coba akun demo instan:</div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;">
-            <button type="button" class="btn btn-outline btn-sm" onclick="quickLoginDemo('org_berkah_01')">🧺 Berkah Laundry</button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="quickLoginDemo('org_freshclean_02')">✨ FreshClean</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="quickFillDemo('owner@berkahlaundry.com', '123456')">🧺 Berkah Laundry</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="quickFillDemo('maya@freshclean.com', '123456')">✨ FreshClean</button>
           </div>
         </div>
       </form>
 
-      <!-- FORM REGISTER OWNER BARU -->
+      <!-- FORM REGISTRASI AKUN BARU -->
       <form id="formRegister" style="display: none;" onsubmit="event.preventDefault(); handleRegister();">
         <div class="form-group">
-          <label>Nama Pemilik (Owner)</label>
-          <input type="text" id="regOwner" class="form-input" placeholder="Contoh: Pak Budi Santoso" required />
+          <label>Email Anda</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="nama@email.com" required />
         </div>
         <div class="form-group">
-          <label>Nama Usaha Laundry</label>
-          <input type="text" id="regBiz" class="form-input" placeholder="Contoh: Laundry Nyaman Kiloan" required />
+          <label>No. WhatsApp Aktif</label>
+          <input type="tel" id="regPhone" class="form-input" placeholder="081234567890" required />
         </div>
         <div class="grid-2">
           <div class="form-group">
-            <label>No. WhatsApp</label>
-            <input type="text" id="regPhone" class="form-input" placeholder="08123456789" required />
+            <label>Password</label>
+            <input type="password" id="regPassword" class="form-input" placeholder="Min. 6 karakter" minlength="6" required />
           </div>
           <div class="form-group">
-            <label>Kota / Wilayah</label>
-            <input type="text" id="regCity" class="form-input" placeholder="Bandung" required />
+            <label>Ulangi Password</label>
+            <input type="password" id="regPasswordConfirm" class="form-input" placeholder="Ulangi password" required />
           </div>
         </div>
-        <div class="form-group">
-          <label>Tarif Dasar Cuci Setrika (Rp/Kg)</label>
-          <input type="number" id="regPrice" class="form-input" value="7000" required />
-        </div>
         <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.8rem;">
-          ✨ Buat Workspace & Mulai Berjualan
+          ✨ Daftarkan Akun Saya
+        </button>
+        <p style="text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem;">
+          Setelah mendaftar, Anda akan diminta login dan mengisi identitas usaha laundry Anda.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. ONBOARDING SCREEN: FORM IDENTITAS OWNER & PROFIL LAUNDRY -->
+  <!-- ============================================================== -->
+  <div class="screen-overlay" id="onboardingScreen" style="display: none;">
+    <div class="auth-card" style="max-width: 520px;">
+      <div class="auth-logo">🏪</div>
+      <div style="text-align: center;">
+        <h2 style="font-size: 1.2rem; font-weight: 800;">Lengkapi <span style="color: var(--primary);">Identitas Owner & Toko</span></h2>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Identitas ini akan tercetak di struk nota dan pesan WhatsApp pelanggan.</p>
+      </div>
+
+      <div class="step-indicator">
+        <span class="step-badge active">✓</span> Akun Terdaftar
+        <span>➔</span>
+        <span class="step-badge active">2</span> Isi Identitas Laundry
+        <span>➔</span>
+        <span class="step-badge">3</span> Dashboard
+      </div>
+
+      <form id="formOnboarding" onsubmit="event.preventDefault(); handleSaveOwnerIdentity();">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Nama Pemilik (Owner)</label>
+            <input type="text" id="obOwnerName" class="form-input" placeholder="Contoh: Bpk. Hendra Wijaya" required />
+          </div>
+          <div class="form-group">
+            <label>Nama Usaha Laundry</label>
+            <input type="text" id="obLaundryName" class="form-input" placeholder="Contoh: Laundry Nyaman Express" required />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>No. WhatsApp Resmi Toko</label>
+            <input type="tel" id="obStorePhone" class="form-input" placeholder="081234567890" required />
+          </div>
+          <div class="form-group">
+            <label>Kota / Wilayah Operasional</label>
+            <input type="text" id="obStoreCity" class="form-input" placeholder="Contoh: Bandung" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Alamat Lengkap Outlet Toko</label>
+          <input type="text" id="obStoreAddress" class="form-input" placeholder="Jl. Sukajadi No. 45, Bandung" required />
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Tarif Dasar Cuci Setrika (Rp/Kg)</label>
+            <input type="number" id="obBasePrice" class="form-input" value="7000" required />
+          </div>
+          <div class="form-group">
+            <label>Pilihan Parfum Default</label>
+            <select id="obDefaultPerfume" class="form-select">
+              <option value="Sakura Blossom">🌸 Sakura Blossom</option>
+              <option value="Ocean Fresh">🌊 Ocean Fresh</option>
+              <option value="Akasia Wood">🪵 Akasia Wood</option>
+              <option value="Downy Mystic">💜 Downy Mystic</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 0.75rem; padding: 0.85rem;">
+          🚀 Simpan Identitas & Buka Kasir
         </button>
       </form>
     </div>
   </div>
 
-  <!-- 2. APP HEADER -->
-  <header>
+  <!-- ============================================================== -->
+  <!-- 3. MAIN DASHBOARD APPLICATION -->
+  <!-- ============================================================== -->
+  <header id="mainHeader" style="display: none;">
     <div class="brand-wrap">
       <div class="brand-icon">🧺</div>
       <div class="brand-text">
         <h1>NSTOK <span>LaundryTrack</span></h1>
-        <p id="headerOwnerName">Owner: Pak Budi</p>
+        <p id="headerOwnerName">Owner: -</p>
       </div>
     </div>
 
@@ -634,19 +758,20 @@
       <button class="nav-btn active" onclick="switchAppTab('intake')">⚖️ Kasir Timbang</button>
       <button class="nav-btn" onclick="switchAppTab('kanban')">🧼 Antrian Cuci</button>
       <button class="nav-btn" onclick="switchAppTab('customer')">📱 Layar Pelanggan</button>
+      <button class="nav-btn" onclick="switchAppTab('identity')">⚙️ Identitas Toko</button>
     </div>
 
     <div class="header-user-section">
-      <div class="store-pill">
+      <div class="store-pill" onclick="switchAppTab('identity')" title="Klik untuk edit profil toko">
         <span>🏢</span>
-        <span id="headerStoreName">Berkah Laundry</span>
+        <span id="headerStoreName">Nama Laundry</span>
       </div>
-      <button class="logout-btn" onclick="handleLogout()" title="Keluar">Logout</button>
+      <button class="logout-btn" onclick="handleLogout()" title="Keluar dari akun">Logout</button>
     </div>
   </header>
 
-  <!-- 3. MAIN VIEWS CONTAINER -->
-  <main>
+  <!-- MAIN APP CONTAINER -->
+  <main id="mainContent" style="display: none;">
 
     <!-- VIEW 1: KASIR TIMBANG & NOTA CEPAT -->
     <div id="view-intake" class="view-container active">
@@ -656,7 +781,7 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">⚖️ Penerimaan Cucian (Nota Baru)</div>
-            <div id="displayTicketNo" style="font-family: 'JetBrains Mono'; font-size: 0.8rem; color: var(--primary); font-weight: 700;">#LND-202609-001</div>
+            <div id="displayTicketNo" style="font-family: 'JetBrains Mono'; font-size: 0.8rem; color: var(--primary); font-weight: 700;">#LND-001</div>
           </div>
 
           <div class="grid-2">
@@ -756,7 +881,7 @@
     <div id="view-kanban" class="view-container">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
         <div>
-          <h3 style="font-weight: 800; font-size: 1rem;">Antrian Cucian (<span id="kanbanStoreTitle">Berkah Laundry</span>)</h3>
+          <h3 style="font-weight: 800; font-size: 1rem;">Antrian Cucian (<span id="kanbanStoreTitle">Nama Laundry</span>)</h3>
           <p style="font-size: 0.7rem; color: var(--text-muted);">Status terisolasi otomatis untuk toko Anda</p>
         </div>
       </div>
@@ -818,12 +943,12 @@
 
       <div class="customer-view-card">
         <div style="text-align: center; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
-          <div style="font-size: 1rem; font-weight: 800; color: white;" id="custStoreName">Berkah Laundry</div>
+          <div style="font-size: 1rem; font-weight: 800; color: white;" id="custStoreName">Nama Laundry</div>
           <div style="font-size: 0.7rem; color: #94A3B8;">Pelacakan Status Realtime</div>
         </div>
 
         <div style="background: #131E32; border-radius: var(--radius-sm); padding: 0.85rem; margin: 0.85rem 0; text-align: center;">
-          <div style="font-size: 0.72rem; color: #94A3B8; font-family: 'JetBrains Mono';" id="custTicketBadge">#LND-202609-001</div>
+          <div style="font-size: 0.72rem; color: #94A3B8; font-family: 'JetBrains Mono';" id="custTicketBadge">#LND-001</div>
           <div style="font-size: 1rem; font-weight: 800; color: white; margin: 4px 0;" id="custServiceTitle">Cuci Kering Setrika (6.5 Kg)</div>
           <div style="display: inline-block; background: rgba(6, 182, 212, 0.2); color: #38BDF8; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; border: 1px solid #06B6D4;" id="custStatusBadge">
             🧼 Sedang Dicuci & Dikeringkan
@@ -864,10 +989,57 @@
       </div>
     </div>
 
+    <!-- VIEW 4: PENGATURAN IDENTITAS TOKO -->
+    <div id="view-identity" class="view-container">
+      <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-header">
+          <div class="card-title">⚙️ Pengaturan Identitas Owner & Laundry</div>
+        </div>
+
+        <form onsubmit="event.preventDefault(); handleUpdateIdentityFromDashboard();">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Nama Pemilik (Owner)</label>
+              <input type="text" id="editOwnerName" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label>Nama Usaha Laundry</label>
+              <input type="text" id="editLaundryName" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>No. WhatsApp Toko</label>
+              <input type="tel" id="editStorePhone" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label>Kota</label>
+              <input type="text" id="editStoreCity" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Alamat Toko (Muncul di Struk)</label>
+            <input type="text" id="editStoreAddress" class="form-input" required />
+          </div>
+
+          <div class="form-group">
+            <label>Tarif Dasar Cuci Setrika (Rp/Kg)</label>
+            <input type="number" id="editBasePrice" class="form-input" required />
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.8rem;">
+            💾 Simpan Perubahan Profil
+          </button>
+        </form>
+      </div>
+    </div>
+
   </main>
 
   <!-- 4. BOTTOM NAVIGATION FOR MOBILE PHONES -->
-  <nav class="bottom-nav">
+  <nav class="bottom-nav" id="mainBottomNav" style="display: none;">
     <button class="bottom-nav-item active" onclick="switchAppTab('intake')">
       <span class="icon">⚖️</span>
       <span>Kasir</span>
@@ -880,14 +1052,18 @@
       <span class="icon">📱</span>
       <span>Pelanggan</span>
     </button>
+    <button class="bottom-nav-item" onclick="switchAppTab('identity')">
+      <span class="icon">⚙️</span>
+      <span>Profil</span>
+    </button>
   </nav>
 
   <!-- STRUK THERMAL MODAL -->
   <div class="modal-overlay" id="receiptModal" onclick="if(event.target===this) this.classList.remove('show')">
     <div class="receipt-paper">
       <div style="text-align: center; margin-bottom: 6px;">
-        <div style="font-weight: 800; font-size: 0.9rem;" id="rcpStoreName">BERKAH LAUNDRY</div>
-        <div style="font-size: 0.62rem;" id="rcpStoreCity">Bandung • Telp: 08123456789</div>
+        <div style="font-weight: 800; font-size: 0.9rem;" id="rcpStoreName">NAMA LAUNDRY</div>
+        <div style="font-size: 0.62rem;" id="rcpStoreCity">Kota • Telp: -</div>
       </div>
       <div style="border-top: 1px dashed black; margin: 4px 0;"></div>
       <div style="display: flex; justify-content: space-between;"><span>NO:</span><span id="rcpNo">#LND-001</span></div>
@@ -914,7 +1090,7 @@
   <!-- WHATSAPP NOTIFICATION POPUP -->
   <div class="wa-toast" id="waToast">
     <div style="background: #128C7E; padding: 6px 10px; color: white; display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700;">
-      <span id="waStoreHeader">Berkah Laundry</span>
+      <span id="waStoreHeader">Laundry</span>
       <button onclick="document.getElementById('waToast').classList.remove('show')" style="background:transparent; border:none; color:white; cursor:pointer;">✕</button>
     </div>
     <div style="background: #ECE5DD; padding: 10px; font-size: 0.75rem; color: #111827;">
@@ -923,120 +1099,266 @@
   </div>
 
   <script>
-    // MULTI-TENANT STATE & AUTHENTICATION
-    let tenants = [
+    // ==============================================================
+    // DATABASE & USER STATE (LOCAL STORAGE PERSISTENCE)
+    // ==============================================================
+    const DEFAULT_USERS = [
       {
-        id: "org_berkah_01",
-        name: "Berkah Laundry Kiloan",
-        ownerName: "Pak Budi",
+        id: "usr_1",
+        email: "owner@berkahlaundry.com",
         phone: "081234567890",
-        city: "Bandung",
-        pricePerKg: 7000,
-        orders: [
-          {
-            id: "1",
-            ticketNumber: "LND-202609-001",
-            customerName: "Ibu Rina Melati",
-            customerPhone: "085712345678",
-            serviceName: "Cuci Kering Setrika",
-            weight: 6.5,
-            perfume: "Sakura Blossom",
-            status: "washing",
-            total: 45500,
-            remaining: 0
-          }
-        ]
+        password: "123456",
+        hasCompletedProfile: true,
+        tenant: {
+          id: "org_berkah_01",
+          name: "Berkah Laundry Kiloan",
+          ownerName: "Pak Budi",
+          phone: "081234567890",
+          city: "Bandung",
+          address: "Jl. Sukajadi No. 12, Bandung",
+          pricePerKg: 7000,
+          orders: [
+            {
+              id: "1",
+              ticketNumber: "LND-001",
+              customerName: "Ibu Rina Melati",
+              customerPhone: "085712345678",
+              serviceName: "Cuci Kering Setrika",
+              weight: 6.5,
+              perfume: "Sakura Blossom",
+              status: "washing",
+              total: 45500,
+              remaining: 0
+            }
+          ]
+        }
       },
       {
-        id: "org_freshclean_02",
-        name: "FreshClean Express",
-        ownerName: "Bu Maya",
+        id: "usr_2",
+        email: "maya@freshclean.com",
         phone: "081987654321",
-        city: "Jakarta",
-        pricePerKg: 9000,
-        orders: [
-          {
-            id: "2",
-            ticketNumber: "FCE-202609-011",
-            customerName: "Bpk. Dimas Pratama",
-            customerPhone: "081399998888",
-            serviceName: "Cuci Express 4 Jam",
-            weight: 4.0,
-            perfume: "Ocean Fresh",
-            status: "received",
-            total: 72000,
-            remaining: 72000
-          }
-        ]
+        password: "123456",
+        hasCompletedProfile: true,
+        tenant: {
+          id: "org_freshclean_02",
+          name: "FreshClean Express",
+          ownerName: "Bu Maya",
+          phone: "081987654321",
+          city: "Jakarta",
+          address: "Ruko Melati Mas Blok B2, Jakarta",
+          pricePerKg: 9000,
+          orders: [
+            {
+              id: "2",
+              ticketNumber: "FCE-011",
+              customerName: "Bpk. Dimas Pratama",
+              customerPhone: "081399998888",
+              serviceName: "Cuci Express 4 Jam",
+              weight: 4.0,
+              perfume: "Ocean Fresh",
+              status: "received",
+              total: 72000,
+              remaining: 72000
+            }
+          ]
+        }
       }
     ];
 
-    let currentTenant = tenants[0];
-    let isAuthenticated = false;
+    function getUsers() {
+      const stored = localStorage.getItem('nstok_laundry_users');
+      return stored ? JSON.parse(stored) : DEFAULT_USERS;
+    }
 
-    // AUTH ACTIONS
-    function switchAuthTab(type) {
-      document.querySelectorAll('.auth-tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      if (type === 'login') {
-        document.getElementById('formLogin').style.display = 'block';
-        document.getElementById('formRegister').style.display = 'none';
+    function saveUsers(users) {
+      localStorage.setItem('nstok_laundry_users', JSON.stringify(users));
+    }
+
+    let activeUser = null;
+
+    // ==============================================================
+    // AUTH LOGIC: REGISTER -> LOGIN -> ONBOARDING
+    // ==============================================================
+    function showAlert(msg, isSuccess = false) {
+      const el = document.getElementById('authAlert');
+      el.className = isSuccess ? 'alert-box alert-success' : 'alert-box alert-danger';
+      el.innerText = msg;
+      el.style.display = 'block';
+    }
+
+    function hideAlert() {
+      document.getElementById('authAlert').style.display = 'none';
+    }
+
+    function switchAuthTab(tab) {
+      hideAlert();
+      document.getElementById('tabBtnLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('tabBtnRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('formLogin').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('formRegister').style.display = tab === 'register' ? 'block' : 'none';
+    }
+
+    function quickFillDemo(email, pass) {
+      document.getElementById('loginIdentifier').value = email;
+      document.getElementById('loginPassword').value = pass;
+    }
+
+    // 1. REGISTER AKUN BARU
+    function handleRegister() {
+      hideAlert();
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
+      const phone = document.getElementById('regPhone').value.trim();
+      const pass = document.getElementById('regPassword').value;
+      const passConfirm = document.getElementById('regPasswordConfirm').value;
+
+      if (pass !== passConfirm) {
+        showAlert("❌ Password konfirmasi tidak sama. Silakan periksa kembali.");
+        return;
+      }
+
+      const users = getUsers();
+      if (users.find(u => u.email === email || u.phone === phone)) {
+        showAlert("⚠️ Email atau Nomor WhatsApp tersebut sudah terdaftar! Silakan login.");
+        return;
+      }
+
+      const newUser = {
+        id: "usr_" + Date.now(),
+        email: email,
+        phone: phone,
+        password: pass,
+        hasCompletedProfile: false, // Belum mengisi identitas owner
+        tenant: null
+      };
+
+      users.push(newUser);
+      saveUsers(users);
+
+      // Berikan notifikasi dan arahkan ke Login
+      showAlert("✅ Registrasi Akun Berhasil! Silakan masukkan password untuk login pertama kali.", true);
+      switchAuthTab('login');
+      document.getElementById('loginIdentifier').value = email;
+      document.getElementById('loginPassword').value = pass;
+    }
+
+    // 2. LOGIN USER
+    function handleLogin() {
+      hideAlert();
+      const identifier = document.getElementById('loginIdentifier').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPassword').value;
+
+      const users = getUsers();
+      const user = users.find(u => (u.email.toLowerCase() === identifier || u.phone === identifier) && u.password === pass);
+
+      if (!user) {
+        showAlert("❌ Email/No. WhatsApp atau Password salah! Jika belum punya akun, klik 'Daftar Akun Baru'.");
+        return;
+      }
+
+      activeUser = user;
+
+      // Cek apakah sudah mengisi profil toko atau belum
+      if (!user.hasCompletedProfile || !user.tenant) {
+        // Alihkan ke Layar Pengisian Identitas Owner & Laundry
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('onboardingScreen').style.display = 'flex';
+        document.getElementById('obStorePhone').value = user.phone;
       } else {
-        document.getElementById('formLogin').style.display = 'none';
-        document.getElementById('formRegister').style.display = 'block';
+        // Langsung masuk Dashboard
+        openDashboard();
       }
     }
 
-    function handleLogin() {
-      isAuthenticated = true;
-      document.getElementById('authScreen').style.display = 'none';
-      updateUI();
-    }
+    // 3. SIMPAN IDENTITAS OWNER (ONBOARDING)
+    function handleSaveOwnerIdentity() {
+      const ownerName = document.getElementById('obOwnerName').value.trim();
+      const laundryName = document.getElementById('obLaundryName').value.trim();
+      const storePhone = document.getElementById('obStorePhone').value.trim();
+      const city = document.getElementById('obStoreCity').value.trim();
+      const address = document.getElementById('obStoreAddress').value.trim();
+      const basePrice = parseFloat(document.getElementById('obBasePrice').value) || 7000;
 
-    function quickLoginDemo(orgId) {
-      const found = tenants.find(t => t.id === orgId);
-      if (found) currentTenant = found;
-      handleLogin();
-    }
-
-    function handleRegister() {
-      const owner = document.getElementById('regOwner').value;
-      const biz = document.getElementById('regBiz').value;
-      const phone = document.getElementById('regPhone').value;
-      const city = document.getElementById('regCity').value;
-      const price = parseFloat(document.getElementById('regPrice').value) || 7000;
-
-      const newOrg = {
+      activeUser.hasCompletedProfile = true;
+      activeUser.tenant = {
         id: "org_" + Date.now(),
-        name: biz,
-        ownerName: owner,
-        phone: phone,
+        name: laundryName,
+        ownerName: ownerName,
+        phone: storePhone,
         city: city,
-        pricePerKg: price,
+        address: address,
+        pricePerKg: basePrice,
         orders: []
       };
 
-      tenants.push(newOrg);
-      currentTenant = newOrg;
-      alert("🎉 Akun Owner Laundry Berhasil Dibuat!");
-      handleLogin();
+      // Simpan perubahan user di database
+      const users = getUsers();
+      const idx = users.findIndex(u => u.id === activeUser.id);
+      if (idx !== -1) users[idx] = activeUser;
+      saveUsers(users);
+
+      document.getElementById('onboardingScreen').style.display = 'none';
+      openDashboard();
     }
 
-    function handleLogout() {
-      isAuthenticated = false;
-      document.getElementById('authScreen').style.display = 'flex';
-    }
+    // 4. BUKA DASHBOARD
+    function openDashboard() {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('onboardingScreen').style.display = 'none';
+      document.getElementById('mainHeader').style.display = 'flex';
+      document.getElementById('mainContent').style.display = 'block';
+      document.getElementById('mainBottomNav').style.display = 'flex';
 
-    function updateUI() {
-      document.getElementById('headerStoreName').innerText = currentTenant.name;
-      document.getElementById('headerOwnerName').innerText = "Owner: " + currentTenant.ownerName;
-      document.getElementById('kanbanStoreTitle').innerText = currentTenant.name;
-      document.getElementById('custStoreName').innerText = currentTenant.name;
+      // Update Header & Data Toko
+      const t = activeUser.tenant;
+      document.getElementById('headerStoreName').innerText = t.name;
+      document.getElementById('headerOwnerName').innerText = "Owner: " + t.ownerName;
+      document.getElementById('kanbanStoreTitle').innerText = t.name;
+      document.getElementById('custStoreName').innerText = t.name;
+
+      // Populate edit form
+      document.getElementById('editOwnerName').value = t.ownerName;
+      document.getElementById('editLaundryName').value = t.name;
+      document.getElementById('editStorePhone').value = t.phone;
+      document.getElementById('editStoreCity').value = t.city;
+      document.getElementById('editStoreAddress').value = t.address;
+      document.getElementById('editBasePrice').value = t.pricePerKg;
+
       calcTotal();
       renderKanban();
     }
 
-    // TAB SWITCHING
+    function handleLogout() {
+      activeUser = null;
+      document.getElementById('mainHeader').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('mainBottomNav').style.display = 'none';
+      document.getElementById('authScreen').style.display = 'flex';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function handleUpdateIdentityFromDashboard() {
+      const t = activeUser.tenant;
+      t.ownerName = document.getElementById('editOwnerName').value.trim();
+      t.name = document.getElementById('editLaundryName').value.trim();
+      t.phone = document.getElementById('editStorePhone').value.trim();
+      t.city = document.getElementById('editStoreCity').value.trim();
+      t.address = document.getElementById('editStoreAddress').value.trim();
+      t.pricePerKg = parseFloat(document.getElementById('editBasePrice').value) || 7000;
+
+      const users = getUsers();
+      const idx = users.findIndex(u => u.id === activeUser.id);
+      if (idx !== -1) users[idx] = activeUser;
+      saveUsers(users);
+
+      document.getElementById('headerStoreName').innerText = t.name;
+      document.getElementById('headerOwnerName').innerText = "Owner: " + t.ownerName;
+      alert("✅ Identitas Toko Berhasil Diperbarui!");
+      switchAppTab('intake');
+    }
+
+    // ==============================================================
+    // APP TABS & ORDER LOGIC
+    // ==============================================================
     function switchAppTab(tabId) {
       document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -1048,18 +1370,20 @@
       if (tabId === 'intake') desktopBtns[0]?.classList.add('active');
       if (tabId === 'kanban') desktopBtns[1]?.classList.add('active');
       if (tabId === 'customer') desktopBtns[2]?.classList.add('active');
+      if (tabId === 'identity') desktopBtns[3]?.classList.add('active');
 
       const mobileBtns = document.querySelectorAll('.bottom-nav-item');
       if (tabId === 'intake') mobileBtns[0]?.classList.add('active');
       if (tabId === 'kanban') mobileBtns[1]?.classList.add('active');
       if (tabId === 'customer') mobileBtns[2]?.classList.add('active');
+      if (tabId === 'identity') mobileBtns[3]?.classList.add('active');
 
       if (tabId === 'kanban') renderKanban();
     }
 
-    // ORDER CALCULATION
     function calcTotal() {
-      const pricePerKg = parseFloat(document.getElementById('laundryService').value) || currentTenant.pricePerKg;
+      if (!activeUser || !activeUser.tenant) return;
+      const pricePerKg = parseFloat(document.getElementById('laundryService').value) || activeUser.tenant.pricePerKg;
       const weight = parseFloat(document.getElementById('laundryWeight').value) || 0;
       const speed = parseFloat(document.getElementById('speedPackage').value) || 1;
 
@@ -1086,11 +1410,11 @@
       const serviceSelect = document.getElementById('laundryService');
       const serviceName = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-name');
       const speed = parseFloat(document.getElementById('speedPackage').value) || 1;
-      const total = (parseFloat(serviceSelect.value) || currentTenant.pricePerKg) * weight * speed;
+      const total = (parseFloat(serviceSelect.value) || activeUser.tenant.pricePerKg) * weight * speed;
       const payStatus = document.getElementById('payStatus').value;
       const remaining = payStatus === 'paid_full' ? 0 : total;
 
-      const ticketNo = "LND-" + Math.floor(100000 + Math.random() * 900000);
+      const ticketNo = "LND-" + Math.floor(100 + Math.random() * 900);
 
       const order = {
         id: String(Date.now()),
@@ -1105,11 +1429,18 @@
         remaining
       };
 
-      currentTenant.orders.unshift(order);
+      activeUser.tenant.orders.unshift(order);
 
-      // Show Thermal Receipt
-      document.getElementById('rcpStoreName').innerText = currentTenant.name.toUpperCase();
-      document.getElementById('rcpStoreCity').innerText = currentTenant.city + ' • Telp: ' + currentTenant.phone;
+      // Save user state
+      const users = getUsers();
+      const idx = users.findIndex(u => u.id === activeUser.id);
+      if (idx !== -1) users[idx] = activeUser;
+      saveUsers(users);
+
+      // Struk Thermal
+      const t = activeUser.tenant;
+      document.getElementById('rcpStoreName').innerText = t.name.toUpperCase();
+      document.getElementById('rcpStoreCity').innerText = t.city + ' • Telp: ' + t.phone;
       document.getElementById('rcpNo').innerText = '#' + ticketNo;
       document.getElementById('rcpCust').innerText = name;
       document.getElementById('rcpPerfume').innerText = perfume;
@@ -1118,20 +1449,21 @@
       document.getElementById('rcpPayStatus').innerText = remaining === 0 ? "LUNAS" : 'SISA: Rp ' + remaining.toLocaleString('id-ID');
       document.getElementById('receiptModal').classList.add('show');
 
-      // Trigger WA Toast
+      // WhatsApp Toast
       showWhatsApp(order, "received");
     }
 
     function showWhatsApp(order, type) {
       const toast = document.getElementById('waToast');
-      document.getElementById('waStoreHeader').innerText = currentTenant.name;
+      const t = activeUser.tenant;
+      document.getElementById('waStoreHeader').innerText = t.name;
       const url = `https://laundrytrack.id/t/${order.ticketNumber}`;
 
       let msg = "";
       if (type === "received") {
         msg = `Halo Kak *${order.customerName}*,
 
-Cucian Anda di *${currentTenant.name}* telah diterima (#${order.ticketNumber}).
+Cucian Anda di *${t.name}* telah diterima (#${order.ticketNumber}).
 
 ⚖️ *Berat:* ${order.weight} Kg
 🌸 *Parfum:* ${order.perfume}
@@ -1141,7 +1473,7 @@ Cucian Anda di *${currentTenant.name}* telah diterima (#${order.ticketNumber}).
       } else if (type === "ready") {
         msg = `Hore! 🎉 Cucian *#${order.ticketNumber}* Anda telah *SELESAI & WANGI*.
 
-Siap diambil di *${currentTenant.name}*.
+Siap diambil di *${t.name}*.
 ${order.remaining > 0 ? "💰 Sisa: Rp " + order.remaining.toLocaleString('id-ID') : "✅ Status: LUNAS"}`;
       }
 
@@ -1149,8 +1481,8 @@ ${order.remaining > 0 ? "💰 Sisa: Rp " + order.remaining.toLocaleString('id-ID
       toast.classList.add('show');
     }
 
-    // KANBAN RENDERING
     function renderKanban() {
+      if (!activeUser || !activeUser.tenant) return;
       const cols = {
         received: document.getElementById('list-received'),
         washing: document.getElementById('list-washing'),
@@ -1161,7 +1493,7 @@ ${order.remaining > 0 ? "💰 Sisa: Rp " + order.remaining.toLocaleString('id-ID
       Object.values(cols).forEach(c => c.innerHTML = '');
       let counts = { received: 0, washing: 0, ironing: 0, ready: 0 };
 
-      currentTenant.orders.forEach(o => {
+      activeUser.tenant.orders.forEach(o => {
         if (cols[o.status]) {
           counts[o.status]++;
           const card = document.createElement('div');
@@ -1207,10 +1539,14 @@ ${order.remaining > 0 ? "💰 Sisa: Rp " + order.remaining.toLocaleString('id-ID
     }
 
     function updateOrderStatus(id, newStatus) {
-      const order = currentTenant.orders.find(o => o.id === id);
+      const order = activeUser.tenant.orders.find(o => o.id === id);
       if (order) {
         order.status = newStatus;
         if (newStatus === 'ready') showWhatsApp(order, "ready");
+        const users = getUsers();
+        const idx = users.findIndex(u => u.id === activeUser.id);
+        if (idx !== -1) users[idx] = activeUser;
+        saveUsers(users);
         renderKanban();
       }
     }
