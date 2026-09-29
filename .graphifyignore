@@ -1,0 +1,33 @@
+﻿# Dependencies & build outputs
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# Package manager locks & temp files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*.log
+
+# Sensitive environment variables
+.env*
+!.env.example
+
+# IDE, cache & test artifacts
+.git/
+coverage/
+.turbo/
+.cache/
+.vscode/
+.idea/
+
+# Graphify output directory itself
+graphify-out/
+
+# Submodules (ignore from graphify scan)
+nstok-ui/
+nstok-db/
+features/
+packages/

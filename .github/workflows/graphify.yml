@@ -1,0 +1,63 @@
+﻿name: Update Graphify Knowledge Graph
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'tsconfig.json'
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - '.graphifyignore'
+      - '.github/workflows/*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild-graph:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install graphifyy openai
+
+      - name: Rebuild Graphify
+        env:
+          OPENAI_BASE_URL: ${{ secrets.GRAPHIFY_LLM_BASE_URL || 'https://9router.sayoti.my.id/v1' }}
+          OPENAI_API_KEY: ${{ secrets.GRAPHIFY_LLM_API_KEY || 'sk-4ddf0cfede90bedc-38s3ev-302ff7fd' }}
+          OPENAI_MODEL: ${{ secrets.GRAPHIFY_LLM_MODEL || 'ag/gemini-3.8-flash' }}
+        run: |
+          graphify . --allow-partial
+          graphify export html
+
+      - name: Commit and push changes if updated
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add graphify-out/
+          if git diff --staged --quiet; then
+            echo "No changes to commit in graphify-out/"
+          else
+            git commit -m "chore(graphify): auto-update knowledge graph [skip ci]"
+            git push
+          fi
+
+
+

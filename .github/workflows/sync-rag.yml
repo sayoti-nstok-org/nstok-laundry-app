@@ -1,0 +1,135 @@
+name: Sync RAG Knowledge to Weaviate
+
+on:
+  workflow_run:
+    workflows: ["Update Graphify Knowledge Graph"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  sync-rag:
+    # Hanya jalan jika workflow graphify sebelumnya sukses (atau saat trigger manual via workflow_dispatch)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Extract & Push Knowledge to Weaviate
+        env:
+          KNOWLEDGE_MASTER_URL: ${{ secrets.KNOWLEDGE_MASTER_URL || 'https://mcp2.nstok.my.id' }}
+          KNOWLEDGE_SYNC_SECRET: ${{ secrets.KNOWLEDGE_SYNC_SECRET }}
+        run: |
+          python - << 'EOF'
+          import os, sys, json, urllib.request
+
+          master_url = os.environ.get("KNOWLEDGE_MASTER_URL", "").rstrip("/")
+          sync_secret = os.environ.get("KNOWLEDGE_SYNC_SECRET", "")
+          repo_name = os.environ.get("GITHUB_REPOSITORY", "nstok-id/unknown")
+          commit_sha = os.environ.get("GITHUB_SHA", "unknown")
+          branch = os.environ.get("GITHUB_REF_NAME", "main")
+
+          if not sync_secret or not master_url:
+              print("[Sync RAG] Warning: KNOWLEDGE_MASTER_URL or KNOWLEDGE_SYNC_SECRET is not set. Skipping sync.")
+              sys.exit(0)
+
+          document_items = []
+          code_items_map = {}
+
+          # 1. Dokumen dari graphify-out/GRAPH_REPORT.md
+          if os.path.exists("graphify-out/GRAPH_REPORT.md"):
+              with open("graphify-out/GRAPH_REPORT.md", "r", encoding="utf-8") as f:
+                  report_content = f.read()
+              document_items.append({
+                  "docId": f"{repo_name.replace('/', '_')}_graph_report",
+                  "docType": "GUIDE",
+                  "title": f"Graphify Architecture Report - {repo_name}",
+                  "category": "Architecture Graph",
+                  "tags": ["graphify", "architecture", "god-nodes"],
+                  "content": report_content
+              })
+
+          # 2. Dokumen Markdown tambahan di folder docs/ atau root README
+          if os.path.exists("docs"):
+              for root_dir, _, files in os.walk("docs"):
+                  for file in files:
+                      if file.endswith(".md"):
+                          file_path = os.path.join(root_dir, file)
+                          with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                              content = f.read()
+                          doc_type = "SOP" if "SOP" in file.upper() else ("ADR" if "ADR" in file.upper() else "PRD")
+                          document_items.append({
+                              "docId": f"{repo_name.replace('/', '_')}_{file.replace('.md', '')}",
+                              "docType": doc_type,
+                              "title": file,
+                              "category": "Repository Docs",
+                              "tags": ["docs", "handbook"],
+                              "content": content
+                          })
+
+          # 3. Node AST Kode dari graphify-out/graph.json
+          if os.path.exists("graphify-out/graph.json"):
+              with open("graphify-out/graph.json", "r", encoding="utf-8") as f:
+                  graph_data = json.load(f)
+
+              for node in graph_data.get("nodes", []):
+                  src_file = node.get("source_file", "unknown")
+                  if src_file not in code_items_map:
+                      code_items_map[src_file] = {
+                          "filePath": src_file,
+                          "moduleName": repo_name.split("/")[-1],
+                          "language": "typescript" if src_file.endswith((".ts", ".tsx")) else "javascript",
+                          "nodes": []
+                      }
+
+                  is_class = bool(node.get("_callable_class"))
+                  node_type = "interface" if is_class else "function"
+                  label = node.get("label", "")
+                  location = node.get("source_location", "")
+                  community = node.get("community_name", "")
+
+                  code_items_map[src_file]["nodes"].append({
+                      "type": node_type,
+                      "name": label,
+                      "signature": location,
+                      "codeSnippet": f"// Node: {label} ({node_type}) in {community}\n// File: {src_file}:{location}"
+                  })
+
+          payload = {
+              "repository": repo_name,
+              "commitHash": commit_sha,
+              "branch": branch,
+              "timestamp": "",
+              "codeItems": list(code_items_map.values()),
+              "documentItems": document_items
+          }
+
+          print(f"[Sync RAG] Prepared payload for {repo_name}: {len(payload['codeItems'])} code files, {len(document_items)} documents.")
+
+          req = urllib.request.Request(
+              f"{master_url}/api/sync-knowledge",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={
+                  "Content-Type": "application/json",
+                  "Authorization": f"Bearer {sync_secret}"
+              }
+          )
+
+          try:
+              with urllib.request.urlopen(req) as resp:
+                  res = json.loads(resp.read().decode())
+                  print(f"[Sync RAG] Success! Result: {res}")
+          except Exception as e:
+              print(f"[Sync RAG] Push error: {e}")
+              # Jangan gagalkan runner jika endpoint offline
+              sys.exit(0)
+          EOF
