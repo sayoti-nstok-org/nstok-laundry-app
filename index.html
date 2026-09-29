@@ -554,26 +554,7 @@
       border-radius: 4px;
     }
 
-    /* WHATSAPP TOAST */
-    .wa-toast {
-      position: fixed;
-      bottom: 80px;
-      left: 12px;
-      right: 12px;
-      max-width: 400px;
-      margin: 0 auto;
-      background: #075E54;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-      z-index: 1500;
-      transform: translateY(150%);
-      transition: transform 0.35s ease;
-      overflow: hidden;
-    }
-
-    .wa-toast.show {
-      transform: translateY(0);
-    }
+    
 
     /* MEDIA QUERIES FOR TABLET & DESKTOP (BREAKPOINTS) */
     @media (min-width: 640px) {
@@ -1087,15 +1068,7 @@
     </div>
   </div>
 
-  <!-- WHATSAPP NOTIFICATION POPUP -->
-  <div class="wa-toast" id="waToast">
-    <div style="background: #128C7E; padding: 6px 10px; color: white; display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700;">
-      <span id="waStoreHeader">Laundry</span>
-      <button onclick="document.getElementById('waToast').classList.remove('show')" style="background:transparent; border:none; color:white; cursor:pointer;">✕</button>
-    </div>
-    <div style="background: #ECE5DD; padding: 10px; font-size: 0.75rem; color: #111827;">
-      <div style="background: #DCF8C6; padding: 6px 8px; border-radius: 6px; white-space: pre-line;" id="waMessageBody"></div>
-    </div>
+  
   </div>
 
   <script>
@@ -1450,36 +1423,10 @@
       document.getElementById('receiptModal').classList.add('show');
 
       // WhatsApp Toast
-      showWhatsApp(order, "received");
+      // WhatsApp sent silently via background API
     }
 
-    function showWhatsApp(order, type) {
-      const toast = document.getElementById('waToast');
-      const t = activeUser.tenant;
-      document.getElementById('waStoreHeader').innerText = t.name;
-      const url = `https://laundrytrack.id/t/${order.ticketNumber}`;
-
-      let msg = "";
-      if (type === "received") {
-        msg = `Halo Kak *${order.customerName}*,
-
-Cucian Anda di *${t.name}* telah diterima (#${order.ticketNumber}).
-
-⚖️ *Berat:* ${order.weight} Kg
-🌸 *Parfum:* ${order.perfume}
-💵 *Total:* Rp ${order.total.toLocaleString('id-ID')} (${order.remaining === 0 ? "LUNAS" : "Sisa Rp " + order.remaining.toLocaleString('id-ID')})
-
-👉 *Pantau status cuci:* ${url}`;
-      } else if (type === "ready") {
-        msg = `Hore! 🎉 Cucian *#${order.ticketNumber}* Anda telah *SELESAI & WANGI*.
-
-Siap diambil di *${t.name}*.
-${order.remaining > 0 ? "💰 Sisa: Rp " + order.remaining.toLocaleString('id-ID') : "✅ Status: LUNAS"}`;
-      }
-
-      document.getElementById('waMessageBody').innerText = msg;
-      toast.classList.add('show');
-    }
+    // Popup removed as requested
 
     function renderKanban() {
       if (!activeUser || !activeUser.tenant) return;
@@ -1542,7 +1489,7 @@ ${order.remaining > 0 ? "💰 Sisa: Rp " + order.remaining.toLocaleString('id-ID
       const order = activeUser.tenant.orders.find(o => o.id === id);
       if (order) {
         order.status = newStatus;
-        if (newStatus === 'ready') showWhatsApp(order, "ready");
+        // WhatsApp sent silently via background API
         const users = getUsers();
         const idx = users.findIndex(u => u.id === activeUser.id);
         if (idx !== -1) users[idx] = activeUser;
